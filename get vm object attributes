@@ -1,0 +1,28 @@
+$vms= get-azvm
+foreach($vm in $vms){
+$WorkspaceID = '0d34c916-e063-43a2-a359-99a08317bdd4'
+    $vm_str = $vm.Name.ToString()
+    $Query = "
+
+    Heartbeat
+    | where Computer == '$vm_str'
+    | where ResourceType == 'virtualMachines'
+    | extend ResourceGroup = case(ResourceGroup <> '', ResourceGroup, 'On-Prem')
+    | where TimeGenerated > ago(72h)
+    | extend Resource=tolower(iff(isempty(_ResourceId), Resource, _ResourceId))
+    | summarize heartbeat_per_hour=count() by bin_at(TimeGenerated, 1h, ago(72h)), Resource,ResourceGroup
+    | extend available_per_hour=iff(heartbeat_per_hour>0, true, false)
+    | extend RG = tolower(ResourceGroup)
+    | summarize total_available_hours=countif(available_per_hour==true) by Resource,RG
+
+    "
+    #$num = 0
+    $Results = Invoke-AzOperationalInsightsQuery -WorkspaceId $WorkspaceID -Query $Query 
+    $avail_hours_str = $Results.Results.total_available_hours  #this is returning a string 
+    $avail_hours_int = [int]::parse($avail_hours_str)
+    $availabilty_percentage = $avail_hours_int / 72
+    echo $availabilty_percentage
+    echo $vm_str
+    #$num += 1
+    
+}
