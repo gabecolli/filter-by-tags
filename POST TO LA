@@ -1,8 +1,8 @@
 # Replace with your Workspace ID
-$CustomerId = "0d34c916-e063-43a2-a359-99a08317bdd4"  
+$CustomerId = "******"  
 
 # Replace with your Primary Key
-$SharedKey = "/3W+fUS4uUdrIs2q9GNEHzL++sSaBJx8KJdn4VTM/oMJsfmkQK5impzmEbO2tj+viRoiFHwz09/Hc636//PiNQ=="
+$SharedKey = "********"
 
 # Specify the name of the record type that you'll be creating
 $LogType = "test3"
