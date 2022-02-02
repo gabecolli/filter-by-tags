@@ -1,0 +1,4 @@
+test3_CL
+    | where TimeGenerated > ago(72h)
+    | extend availability_72hrs_s 
+    | extend Computer
