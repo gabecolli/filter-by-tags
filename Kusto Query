@@ -1,4 +1,6 @@
 test3_CL
-    | where TimeGenerated > ago(72h)
+    | where TimeGenerated > ago(1h)
     | extend availability_72hrs_s 
     | extend Computer
+    | extend round(availability_rate=toreal(total_available_hours_s)*100/72,2)  //convert total avail hours to integer
+    | project rg_s, Computer, total_available_hours_s, availability_rate, tags_s
