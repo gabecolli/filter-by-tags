@@ -1,28 +1,39 @@
 $vms= get-azvm
 foreach($vm in $vms){
-$WorkspaceID = '******'
+$WorkspaceID = '*******'
     $vm_str = $vm.Name.ToString()
     $Query = "
 
+    let timeRangeStart = now(-3d);
+    let timeRangeEnd = now();
     Heartbeat
-    | where Computer == '$vm_str'
-    | where ResourceType == 'virtualMachines'
-    | extend ResourceGroup = case(ResourceGroup <> '', ResourceGroup, 'On-Prem')
-    | where TimeGenerated > ago(72h)
-    | extend Resource=tolower(iff(isempty(_ResourceId), Resource, _ResourceId))
-    | summarize heartbeat_per_hour=count() by bin_at(TimeGenerated, 1h, ago(72h)), Resource,ResourceGroup
-    | extend available_per_hour=iff(heartbeat_per_hour>0, true, false)
-    | extend RG = tolower(ResourceGroup)
-    | summarize total_available_hours=countif(available_per_hour==true) by Resource,RG
+        | where Computer == '$vm_str'
+        | extend ResourceGroup = case(ResourceGroup <> '', ResourceGroup, 'On-Prem')
+        | where TimeGenerated > timeRangeStart and TimeGenerated < timeRangeEnd
+        | extend Resource=tolower(iff(isempty(_ResourceId), Resource, _ResourceId))
+        | summarize heartbeat_per_hour=count() by bin_at(TimeGenerated, 1h, timeRangeStart), Resource,ResourceGroup
+        | extend available_per_hour=iff(heartbeat_per_hour>0, true, false)
+        | extend RG = tolower(ResourceGroup)
+        | summarize total_available_hours=countif(available_per_hour==true) by Resource,RG
+        | extend total_number_of_buckets=round((timeRangeEnd-timeRangeStart)/1h)
+        | extend round(availability_rate=total_available_hours*100/total_number_of_buckets,2)
+        | order by availability_rate asc
+
+
+
 
     "
-    #$num = 0
     $Results = Invoke-AzOperationalInsightsQuery -WorkspaceId $WorkspaceID -Query $Query 
-    $avail_hours_str = $Results.Results.total_available_hours  #this is returning a string 
-    $avail_hours_int = [int]::parse($avail_hours_str)
-    $availabilty_percentage = $avail_hours_int / 72
-    $vmrg = $vm.ResourceGroupName
+    $Resource = $Results.Results.Resource
+    
+    $rg = $Results.Results.RG
+    
+    $total_available_hours = $Results.Results.total_available_hours
     $vmtags = $vm.Tags.Values
+    $avail_percent = $total_available_hours / 72 * 100
+    #convert percentage to string
+    $percent_avail = $avail_percent.ToString()
+ 
 
 
 
@@ -31,13 +42,13 @@ $WorkspaceID = '******'
 
 
     # Replace with your Workspace ID
-$CustomerId = "******"  
+$CustomerId = "561131d9-5351-4f04-96fd-f812dfceb8be"  
 
 # Replace with your Primary Key
-$SharedKey = "******"
+$SharedKey = "*******"
 
 # Specify the name of the record type that you'll be creating
-$LogType = "test3"
+$LogType = "secondattempt"
 
 # You can use an optional field to specify the timestamp from the data. If the time field is not specified, Azure Monitor assumes the time is the message ingestion time
 $TimeStampField = ""
@@ -46,10 +57,13 @@ $TimeStampField = ""
 # Create two records with the same set of properties to create
 $json = @"
 [{  "Computer": "$Vm_str",
-            "total_available_hours": "24",
-            "availability_72hrs" : "$availabilty_percentage",
+            "Resource": "$Resource",
+            "RG" : "$rg",
             "tags" : "$vmtags",
-            "rg" : "$vmrg"
+            "total_available_hours" : "$total_available_hours",
+            "Availability" : "$percent_avail"
+            
+             
             
    
 }]
