@@ -26,7 +26,7 @@ $WorkspaceID = '*******'
     $Results = Invoke-AzOperationalInsightsQuery -WorkspaceId $WorkspaceID -Query $Query 
     $Resource = $Results.Results.Resource
     
-    $rg = $Results.Results.RG
+    $rg = $vm.ResourceGroupName
     
     $total_available_hours = $Results.Results.total_available_hours
     $vmtags = $vm.Tags.Values
