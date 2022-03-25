@@ -1,6 +1,6 @@
 $vms= get-azvm
 foreach($vm in $vms){
-$WorkspaceID = '*******'
+$WorkspaceID = '561131d9-5351-4f04-96fd-f812dfceb8be'
     $vm_str = $vm.Name.ToString()
     $Query = "
 
@@ -25,15 +25,22 @@ $WorkspaceID = '*******'
     "
     $Results = Invoke-AzOperationalInsightsQuery -WorkspaceId $WorkspaceID -Query $Query 
     $Resource = $Results.Results.Resource
+   
     
     $rg = $vm.ResourceGroupName
     
     $total_available_hours = $Results.Results.total_available_hours
+
+    $total_available_hours.GetType()
     $vmtags = $vm.Tags.Values
     $avail_percent = $total_available_hours / 72 * 100
+   
+   
     #convert percentage to string
     $percent_avail = $avail_percent.ToString()
- 
+    echo $percent_avail
+
+    
 
 
 
@@ -45,7 +52,7 @@ $WorkspaceID = '*******'
 $CustomerId = "561131d9-5351-4f04-96fd-f812dfceb8be"  
 
 # Replace with your Primary Key
-$SharedKey = "*******"
+$SharedKey = "JJSTkrwURB+kzhCxShrG6IReJ4CsM6s6ezuwu3v5312lak5hsfkUkg+Mk+0dnjTkfqPCq6X7Lmtet0Eo/uM5HQ=="
 
 # Specify the name of the record type that you'll be creating
 $LogType = "secondattempt"
