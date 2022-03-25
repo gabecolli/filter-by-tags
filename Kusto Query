@@ -1,6 +1,3 @@
-let timeRangeStart = now(-3d);
-let timeRangeEnd = now();
 secondattempt_CL
-| where TimeGenerated > ago(10m)
-| project total_available_hours_s,RG_s, Computer, tags_s, toint(Availability_s)
-
+| where TimeGenerated > ago(2m)
+| project RG_s, Computer, tags_s,total_available_hours_s, bin(todouble(Availability_s), 0.01)
