@@ -1,6 +1,6 @@
 $vms= get-azvm
 foreach($vm in $vms){
-$WorkspaceID = '561131d9-5351-4f04-96fd-f812dfceb8be'
+$WorkspaceID = ''
     $vm_str = $vm.Name.ToString()
     $Query = "
 
@@ -49,10 +49,10 @@ $WorkspaceID = '561131d9-5351-4f04-96fd-f812dfceb8be'
 
 
     # Replace with your Workspace ID
-$CustomerId = "561131d9-5351-4f04-96fd-f812dfceb8be"  
+$CustomerId = ""  
 
 # Replace with your Primary Key
-$SharedKey = "JJSTkrwURB+kzhCxShrG6IReJ4CsM6s6ezuwu3v5312lak5hsfkUkg+Mk+0dnjTkfqPCq6X7Lmtet0Eo/uM5HQ=="
+$SharedKey = ""
 
 # Specify the name of the record type that you'll be creating
 $LogType = "secondattempt"
